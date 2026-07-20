@@ -102,9 +102,9 @@ The following auxiliary rules are called to build the necessary dependencies for
 - `Prototype-v1.2.3/.stamp` fetches the artifact for [POPL24] from its Zenodo URL
 - `sstt/.stamp` fetches `sstt` from its public repository
 - `MLsem/.stamp` fetches `MLsem` from its public repository, and checks out a commit from the time of submission (it's API as changed since)
-
 - `sstt/benchmarks/%.json` builds the problem JSON files from tests in the MLsem repository
 
+The submitted tarball already contains a checkout of `cduce`, `MLsem` and `sstt`, but requires the creation of a local opam switch.
 
 We recommend using the two main targets of the makefile to run the tests and
 automatically setup the environment, although it should be fairly easy to run
