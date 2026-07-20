@@ -1,3 +1,5 @@
+.cduce-installed
+.deps-installed
 *.annot
 *.cmo
 *.cma
@@ -34,3 +36,8 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+MLsem
+sstt
+cduce
+
