@@ -1,4 +1,4 @@
-# Artifact Implementing Set-Theoretic Types
+# Artifact of the paper "Implementing Set-Theoretic Types"
 
 ## Presentation
 
