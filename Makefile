@@ -14,7 +14,7 @@ _opam/.opam-switch/switch-config:
 	opam install -y $(ML_DEPS)
 	touch $@
 
-.cduce/.stamp
+.cduce/.stamp:
 	git clone https://gitlab.math.univ-paris-diderot.fr/cduce/cduce.git
 	touch $@
 
