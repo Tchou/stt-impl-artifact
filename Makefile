@@ -47,6 +47,8 @@ MLsem/.stamp:  sstt/.stamp
 
 sstt/benchmarks/%.json: MLsem/.stamp .deps-installed
 	@echo "Running phase 1: recording tyling instances of $<"
+	@echo "-------------------------------------------------"
+	@echo
 	cd MLsem && \
 	opam exec -- dune exec -- src/bin/native.exe -record $(patsubst sstt/benchmarks/%.json,tests/%.ml,$@) && \
 	cp $(patsubst sstt/benchmarks/%,tests/%,$@) sstt/benchmarks
@@ -55,6 +57,8 @@ JSON=sstt/benchmarks/0_hm.json sstt/benchmarks/1_union_inter.json sstt/benchmark
 
 phase2: $(JSON) sstt/.stamp .cduce-installed
 	@echo "Running phase 2: testing SSTT in 8 configurations"
+	@echo "-------------------------------------------------"
+	@echo
 	cd sstt && \
 	benchmarks/run.sh
 
