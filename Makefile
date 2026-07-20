@@ -3,17 +3,16 @@ ML_DEPS=conf-libssl dune js_of_ocaml-compiler js_of_ocaml-ppx markup menhir menh
 		ocamlfind ocurl odoc sedlex zarith zarith_stubs_js pomap ppx_deriving tsort \
 		ppx_expect mdx wasm_of_ocaml-compiler binaryen-bin \
 
-.PHONY: phase1 phase2 claim_popl24
+.PHONY: phase2 claim_popl24
 
-_opam:
+_opam/.opam-switch/switch-config:
 	@echo "Creating local opam switch"
 	opam switch create ./ 5.4.1
 
-.deps-installed: _opam
+.deps-installed: _opam/.opam-switch/switch-config
 	@echo "Installing dependencies"
 	opam install -y $(ML_DEPS)
 	touch $@
-
 
 .cduce-installed: .deps-installed
 	@echo "Installing CDuce"
@@ -31,28 +30,30 @@ _opam:
 	mv Prototype-v1.2.3/*/* Prototype-v1.2.3
 	touch $@
 
-sstt:
+sstt/.stamp:
 	@echo "Retrieving Instrumented SSTT"
 	git clone https://github.com/E-Sh4rk/sstt && \
 	cd sstt && \
 	git checkout -b instrumented origin/instrumented
+	touch $@
 
-MLsem:
+MLsem/.stamp:  sstt/.stamp
 	@echo "Retrieving MLsem"
 	git clone https://github.com/E-Sh4rk/MLsem && \
 	cd MLsem && \
 	git checkout -b artefact-evaluation f73ed9772dc442d3f472fc495145a916563112a5 && \
 	ln -s ../sstt
+	touch $@
 
-sstt/benchmarks/%.json: MLsem/tests/%.ml MLsem
+sstt/benchmarks/%.json: MLsem/.stamp .deps-installed
 	@echo "Running phase 1: recording tyling instances of $<"
 	cd MLsem && \
-	opam exec -- dune exec -- src/bin/native.exe -record $(patsubst MLsem/%,%,$<) && \
+	opam exec -- dune exec -- src/bin/native.exe -record $(patsubst sstt/benchmarks/%.json,tests/%.ml,$@) && \
 	cp $(patsubst sstt/benchmarks/%,tests/%,$@) sstt/benchmarks
 
 JSON=sstt/benchmarks/0_hm.json sstt/benchmarks/1_union_inter.json sstt/benchmarks/2_dyn.json
 
-phase2: $(JSON) sstt
+phase2: $(JSON) sstt/.stamp .cduce-installed
 	@echo "Running phase 2: testing SSTT in 8 configurations"
 	cd sstt && \
 	benchmarks/run.sh
