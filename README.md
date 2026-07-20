@@ -5,7 +5,7 @@
 This repository contains the companion artifact for the paper "Implementing
 Set-Theoretic Types".
 
-The paper reports on the SSTT (Simple Set-Theoretic Types) library, in
+The paper reports on the [SSTT](https://github.com/E-Sh4rk/sstt) (Simple Set-Theoretic Types) library, in
 particular the data-structures used to represent set-theoretic types. Such types are (informally) given by the grammar:
 
 $ t ::= b | t\times t | t \rightarrow t | t \wedge t | t \vee t | \lnot t | 𝟘 | 𝟙 | \alpha $
