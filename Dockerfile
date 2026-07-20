@@ -28,8 +28,8 @@ RUN curl -L -o .local/bin/opam https://github.com/ocaml/opam/releases/download/2
     opam init --bare --disable-sandboxing
 
 RUN make .popl-24-installed && \
-    make sstt && \
-    make MLsem && \
+    make sstt/.stamp && \
+    make MLsem/.stamp && \
     cd sstt && \
     make web-deps js wasm && \
     cp -r web ..

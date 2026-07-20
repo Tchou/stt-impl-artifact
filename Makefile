@@ -14,15 +14,18 @@ _opam/.opam-switch/switch-config:
 	opam install -y $(ML_DEPS)
 	touch $@
 
-.cduce-installed: .deps-installed
+.cduce/.stamp
+	git clone https://gitlab.math.univ-paris-diderot.fr/cduce/cduce.git
+	touch $@
+
+.cduce-installed: .deps-installed cduce/.stamp
 	@echo "Installing CDuce"
-	test -d cduce || git clone https://gitlab.math.univ-paris-diderot.fr/cduce/cduce.git
 	cd cduce && \
 	opam pin -y -n . && \
 	opam install cduce-types cduce
 	touch $@
 
-.popl-24-installed: .cduce-installed
+Prototype-v1.2.3/.stamp:
 	@echo "Retrieving et al [POPL24] prototype"
 	curl -L -O -J "https://zenodo.org/records/11203457/files/E-Sh4rk/Prototype-v1.2.3.zip?download=1"
 	mkdir -p Prototype-v1.2.3
@@ -62,7 +65,7 @@ phase2: $(JSON) sstt/.stamp .cduce-installed
 	cd sstt && \
 	benchmarks/run.sh
 
-claim_popl24: .popl-24-installed
+claim_popl24: Prototype-v1.2.3/.stamp .cduce-installed
 	@echo "Running vanilla POPL24 to typecheck concat/flatten (should typecheck quickly)"
 	@echo "-----------------------------------------------------------------------------"
 	@echo
