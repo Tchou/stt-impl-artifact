@@ -1,0 +1,23 @@
+[
+    {
+        "name": "JFLA demonstration",
+        "path": "jfla.stml"
+    },
+    {
+        "name": "Examples from POPL24 submission",
+        "path": "paper.stml"
+    },
+    {
+        "name": "Fixpoint and recursion",
+        "path": "fixpoint.stml"
+    },
+    {
+        "name": "Pattern matching",
+        "path": "patterns.stml"
+    },
+    {
+        "name": "OCaml's List module",
+        "path": "list.stml"
+    }
+    
+]

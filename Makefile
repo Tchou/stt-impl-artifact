@@ -16,6 +16,7 @@ _opam/.opam-switch/switch-config:
 
 cduce/.stamp:
 	git clone https://gitlab.math.univ-paris-diderot.fr/cduce/cduce.git
+	rm -rf cduce/.git
 	touch $@
 
 .cduce-installed: .deps-installed cduce/.stamp
@@ -37,7 +38,8 @@ sstt/.stamp:
 	@echo "Retrieving Instrumented SSTT"
 	git clone https://github.com/E-Sh4rk/sstt && \
 	cd sstt && \
-	git checkout -b instrumented origin/instrumented
+	git checkout -b instrumented origin/instrumented && \
+	rm -rf .git
 	touch $@
 
 MLsem/.stamp:  sstt/.stamp
@@ -45,7 +47,8 @@ MLsem/.stamp:  sstt/.stamp
 	git clone https://github.com/E-Sh4rk/MLsem && \
 	cd MLsem && \
 	git checkout -b artefact-evaluation f73ed9772dc442d3f472fc495145a916563112a5 && \
-	ln -s ../sstt
+	ln -s ../sstt && \
+	rm -rf .git
 	touch $@
 
 sstt/benchmarks/%.json: MLsem/.stamp .deps-installed

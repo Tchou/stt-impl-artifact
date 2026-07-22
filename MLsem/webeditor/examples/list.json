@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Functional Programming",
+        "path": "functional.stml"
+    },
+    {
+        "name": "Type Narrowing",
+        "path": "narrowing.stml"
+    },
+    {
+        "name": "Imperative Programming (encoding)",
+        "path": "imperative.stml"
+    },
+    {
+        "name": "Imperative Programming (built-in)",
+        "path": "imperative_advanced.stml"
+    },
+    {
+        "name": "Gradual Typing",
+        "path": "gradual.stml"
+    },
+    {
+        "name": "Row Polymorphism",
+        "path": "records.stml"
+    }
+]

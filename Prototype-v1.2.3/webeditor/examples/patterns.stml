@@ -1,0 +1,78 @@
+
+let succ = <Int->Int>
+
+let test_patterns (a,_) = a
+
+let test2_patterns x =
+  match x with (a,_)&(_,b) -> (a,b) end
+
+let pack x y = (x,y)
+
+let test3_patterns x y =
+  let (y,x) = pack x y in
+  pack x y
+
+let typeof_patterns x =
+  match x with
+  | :Unit | :Nil -> "Nil"
+  | :String -> "String"
+  | :Char -> "Char"
+  | :Int -> "Number"
+  | :Bool -> "Boolean"
+  | :Any -> "Object"
+  end
+
+let land_patterns a b =
+  match a,b with
+  | :True, :True -> true
+  | :Any -> false
+  end
+
+let rec fact n =
+  match n with
+  | :0 -> 1
+  | n -> (fact (n-1))*n
+  end
+
+let rec length lst =
+  match lst with
+  | [] -> 0
+  | (_, tl & :List) -> succ (length tl)
+  end
+
+let rec map f lst =
+  match lst with
+  | [] -> []
+  | (e,lst) & :List -> ((f e), map f lst)
+  end
+
+let rec map f (lst:['a*]) =
+  match lst with
+  | [] -> []
+  | (e,lst) -> ((f e), map f lst)
+  end
+
+let rec filter (f: ('a->Any) & ('b -> ~True)) (l:[('a|'b)*]) =
+  match l with
+  | :Nil -> nil
+  | (e,l) ->
+    if f e is True
+    then (e, filter f l)
+    else filter f l
+  end
+
+let rec eval e =
+  match e with
+  | (:"add", (e1, e2)) -> (eval e1) + (eval e2)
+  | (:"uminus", e) -> 0 - (eval e)
+  | (:"const", x) -> x
+  end
+
+type Expr = ("const", (0--)) | ("add", (Expr, Expr)) | ("uminus", Expr)
+
+let rec eval_ann (e:Expr) =
+  match e with
+  | (:"add", (e1, e2)) -> (eval_ann e1) + (eval_ann e2)
+  | (:"uminus", e) -> 0 - (eval_ann e)
+  | (:"const", x) -> x
+  end

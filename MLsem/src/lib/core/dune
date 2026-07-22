@@ -1,0 +1,8 @@
+(library
+ (name mlsem)
+ (public_name mlsem)
+ (libraries mlsem_utils mlsem_common mlsem_system mlsem_types mlsem_lang zarith sstt unix yojson)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq)))
+
+

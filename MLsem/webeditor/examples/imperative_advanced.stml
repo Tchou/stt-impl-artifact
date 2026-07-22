@@ -1,0 +1,102 @@
+
+val (+) : (int, int) -> int
+val (-) : (int, int) -> int
+val ( * ) : (int, int) -> int
+val (/) : (int, int) -> int
+val (%) : (int, int) -> int
+
+val (<) : (int, int) -> bool
+val (<=) : (int, int) -> bool
+val (>) : (int, int) -> bool
+val (>=) : (int, int) -> bool
+
+(* If not specifying the type of a top-level mutable variable, it is considered dyn *)
+let mut a = 42
+let read_a = a
+let read_a_cast = (a :>! bool)
+let write_a = a := true
+
+let mut b : int = 73
+let read_b = b
+let write_b = b := true
+
+let typeof x =
+  if x is string do return "string" end ;
+  if x is bool do return "bool" end ;
+  if x is int do return "int" end ;
+  if x is char do return "char" end ;
+  if x is () do return "unit" end ;
+  "object"
+
+let neg_and_pos x =
+  let mut x = x in
+  if x is Nil do return x end ;
+  if x < 0 do x := 0-x end ;
+  x := (0-x,x) ;
+  return x
+
+let neg_and_pos_ann (x:int|Nil) =
+  let mut x = x in
+  if x is Nil do return x end ;
+  if x < 0 do x := 0-x end ;
+  x := (0-x,x) ;
+  return x
+
+val rand : () -> any
+val is_int : (int -> true) & (~int -> false)
+let loop_tricky_narrowing y =
+  let mut x in
+  let mut y = y in
+  while is_int (x := rand () ; x) do
+    y := y + x
+  end ;
+  return (x,y)
+
+let loop_invalid x =
+  let mut x = x in
+  while true do
+    x := x + 1 ;
+    x := false
+  end ;
+  x
+
+let loop_valid x =
+  let mut x = x in
+  while true do
+    if x is ~int do return x end ;
+    x := x + 1 ;
+    x := false
+  end ;
+  x
+
+abstract type dict('k, 'v)
+abstract type array('a)
+val dict : () -> dict('a, 'b)
+val array : () -> array('a)
+val ([]<-) : ((dict('a, 'b), 'a, 'b) -> ()) & ((array('b), int, 'b) -> ())
+val ([]) : ((dict('a, 'b), 'a) -> 'b) & ((array('b), int) -> 'b)
+val push : array('a) -> 'a -> ()
+val len : array('a) -> int
+
+let filter_imp (f:('a -> bool) & ('b -> false)) (arr:array('a|'b)) =
+  let res = array () in
+  let mut i = 0 in
+  while i < (len arr) do
+    let e = arr[i] in
+    if f e do push res e end ;
+    i := i + 1
+  end ;
+  return res
+
+val filter_imp_test : array(42|13|"abc")
+(* we have to specify a type for filter_imp_test,
+   otherwise the type inference will infer array(42|13|"abc"|'a) where 'a cannot be generalized,
+   which will error as top-level definitions cannot have unquantified type variables *)
+let filter_imp_test =
+  let mut arr = array () in
+  push arr 42 ;
+  push arr false ;
+  push arr 13 ;
+  arr := filter_imp (fun x -> (x is int)) arr ;
+  push arr "abc" ;
+  arr

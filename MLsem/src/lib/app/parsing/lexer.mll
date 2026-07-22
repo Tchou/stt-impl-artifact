@@ -1,0 +1,194 @@
+{
+
+let enter_newline lexbuf =
+  Lexing.new_line lexbuf;
+  lexbuf
+
+let char_for_backslash = function
+  | "n" -> '\010'
+  | "r" -> '\013'
+  | "b" -> '\008'
+  | "t" -> '\009'
+  | c when String.length c = 1 -> c.[0]
+  | c -> Char.chr (int_of_string ("0o"^c))
+
+module Make(P:PAst.ParserExt) = struct
+  module Parser = Parser.Make(P)
+  exception LexerError of string
+  open Parser
+}
+
+let backslash_escapes = ['\\' '\'' '"' 'n' 't' 'b' 'r' ' '] | ['0'-'7']['0'-'7']['0'-'7']
+
+let newline = ('\010' | '\013' | "\013\010")
+
+let blank   = [' ' '\009' '\012']
+
+let id = ['a'-'z''_']['a'-'z''A'-'Z''0'-'9''_''\'']*
+let indexed_id = ['a'-'z''_']['a'-'z''A'-'Z''0'-'9''_''\'']*'['
+let constr_id = ['A'-'Z']['a'-'z''A'-'Z''0'-'9''_''\'']*
+let param_constr_id = ['A'-'Z']['a'-'z''A'-'Z''0'-'9''_''\'']*'('
+
+let decimal = ['0'-'9']+ ('_'+ ['0'-'9']+)*
+
+let int = decimal
+
+let float_e = decimal ['e' 'E'] (['-' '+']? decimal)?
+let float_comma = decimal '.' decimal (['e' 'E'] ['-' '+']? decimal)?
+let float = (float_e | float_comma)
+
+let type_var = '\'' ['a'-'z''A'-'Z''0'-'9']['a'-'z''A'-'Z''0'-'9''_']*
+let weak_type_var = '\'' '_' ['a'-'z''A'-'Z''0'-'9']['a'-'z''A'-'Z''0'-'9''_']*
+let row_var = '`' ['a'-'z''A'-'Z''0'-'9']['a'-'z''A'-'Z''0'-'9''_']*
+let weak_row_var = '`' '_' ['a'-'z''A'-'Z''0'-'9']['a'-'z''A'-'Z''0'-'9''_']*
+
+let op_char =  '!' | '$' | '%' | '&' | '*' | '+' | '-' |
+               '.' | '/' | ':' | ';' | '<' | '=' | '>' |
+               '?' | '@' | '^' | '|' | '~'
+
+let prefix_op = ('!' | '?' | '~') op_char*
+let infix_op = ('=' | '<' | '>' | '@' | '$'
+              | '+' | '-' | '*' | '/' | '^' | '%'
+              | '&' op_char | '|' op_char | '.' op_char ) op_char*
+let indexed_op = ']' ('=' | '<' | '>' | '@' | '$') op_char*
+let op_id = '(' ' '* ('[' (indexed_op | ']') | prefix_op | infix_op) ' '* ')'
+
+rule token = parse
+| newline { enter_newline lexbuf |> token }
+| blank   { token lexbuf }
+| "type"  { TYPE }
+| "where" { WHERE }
+| "and"   { AND_KW }
+| "or"    { OR_KW }
+| "suggest"   { SUGGEST }
+| "abstract"  { ABSTRACT }
+| "#"     { HASHTAG }
+| "(*"    { comment 0 lexbuf }
+| "%("    { read_ext (Buffer.create 17) 0 lexbuf }
+| "->"    { ARROW }
+| "&"     { AND }
+| "|"     { OR }
+| "\\"    { DIFF }
+| "~"     { NEG  }
+| "_"     { PLACEHOLDER_VAR }
+| ":"     { COLON }
+| ":!"    { CAST_STATIC }
+| ":!!"   { CAST_NOCHECK }
+| "::"    { CONS }
+| ":>"    { COERCE }
+| ":>!"   { COERCE_STATIC }
+| ":>!!"  { COERCE_NOCHECK }
+| ","     { COMMA }
+| "."     { POINT }
+| "="     { EQUAL }
+| ":="    { ASSIGN }
+| "?"     { INTERROGATION_MARK }
+| "!"     { EXCLAMATION_MARK }
+| "if"    { IF }
+| "is"    { IS }
+| "then"  { THEN }
+| "else"  { ELSE }
+| "while" { WHILE }
+| "do"    { DO }
+| "return"   { RETURN }
+| "break"    { BREAK }
+| "continue" { CONTINUE }
+| "match" { MATCH }
+| "with"  { WITH }
+| "begin" { BEGIN }
+| "end"   { END }
+| "fun"   { FUN }
+| "val"   { VAL }
+| "let"   { LET }
+| "mut"   { MUT }
+| "in"    { IN }
+| "fst"   { FST }
+| "snd"   { SND }
+| "hd"    { HD }
+| "tl"    { TL }
+| "("     { LPAREN }
+| ")"     { RPAREN }
+| "{"     { LBRACE }
+| "}"     { RBRACE }
+| "["     { LBRACKET }
+| "]"     { RBRACKET }
+| ";"     { SEMICOLON }
+| ";;"    { DOUBLESEMICOLON }
+| "*"     { TIMES }
+| ".."    { DOUBLEPOINT }
+| "-"     { MINUS }
+| "+"     { PLUS  }
+| "/"     { DIV   }
+| "<"     { LT }
+| ">"     { GT }
+| int as i { LINT (Z.of_string i) }
+| float as f { LFLOAT (float_of_string f) }
+| "true"  { LBOOL true }
+| "false" { LBOOL false }
+| infix_op as s  { INFIX s }
+| prefix_op as s { PREFIX s }
+| indexed_op as s { INDEXED s }
+| op_id as s { OPID (String.sub s 1 ((String.length s) - 2) |> String.trim) }
+| '"' { read_string (Buffer.create 17) lexbuf }
+| '\'' ([^ '\'' '\\' '\010' '\013'] as c) '\'' { LCHAR c }
+| '\'' '\\' (backslash_escapes as c) '\'' { LCHAR (char_for_backslash c) }
+| id as s { ID s }
+| indexed_id as s { IID (String.sub s 0 ((String.length s) - 1)) }
+| ")[" { IRPAREN }
+| constr_id as s { CID s }
+| param_constr_id as s { PCID (String.sub s 0 ((String.length s) - 1)) }
+| type_var as s { TVAR (String.sub s 1 ((String.length s) - 1)) }
+| weak_type_var as s { TVAR_WEAK (String.sub s 1 ((String.length s) - 1)) }
+| row_var as s { RVAR (String.sub s 1 ((String.length s) - 1)) }
+| weak_row_var as s { RVAR_WEAK (String.sub s 1 ((String.length s) - 1)) }
+| eof     { EOF }
+| _ { raise (LexerError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+
+and comment depth = parse
+| newline { enter_newline lexbuf |> comment depth }
+| "*)" {
+  if depth = 0 then token lexbuf else comment (depth - 1) lexbuf
+}
+| "(*" {
+  comment (depth + 1) lexbuf
+}
+| eof { EOF }
+| _ {
+  comment depth lexbuf
+}
+
+and read_string buf = parse
+| newline { enter_newline lexbuf |> read_string buf }
+| '"' { LSTRING (Buffer.contents buf) }
+| '\\' (backslash_escapes as c) { Buffer.add_char buf (char_for_backslash c); read_string buf lexbuf }
+| [^ '"' '\\' '\010' '\013']+
+  { Buffer.add_string buf (Lexing.lexeme lexbuf);
+    read_string buf lexbuf
+  }
+| _ { raise (LexerError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
+| eof { raise (LexerError ("String is not terminated")) }
+
+and read_ext buf depth = parse
+| newline {
+  Buffer.add_string buf (Lexing.lexeme lexbuf);
+  enter_newline lexbuf |> read_ext buf depth }
+| ")%" {
+  if depth = 0 then EXT (Buffer.contents buf)
+  else begin
+    Buffer.add_string buf (Lexing.lexeme lexbuf);
+    read_ext buf (depth - 1) lexbuf
+  end
+}
+| "%(" {
+  Buffer.add_string buf (Lexing.lexeme lexbuf);
+  read_ext buf (depth + 1) lexbuf
+}
+| eof { raise (LexerError ("Type is not terminated")) }
+| _
+  { Buffer.add_string buf (Lexing.lexeme lexbuf);
+    read_ext buf depth lexbuf
+  }
+
+{
+end
+}

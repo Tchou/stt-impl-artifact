@@ -1,0 +1,30 @@
+open Mlsem_types
+
+module Zd = struct
+  type t = Z.t
+  let pp = Z.pp_print
+end
+type t =
+| Unit | Nil
+| Bool of bool
+| Int of Zd.t
+| Float of float
+| Char of char
+| String of string
+[@@deriving show]
+
+let typeof c =
+  match c with
+  | Unit -> Ty.unit
+  | Nil -> Lst.nil
+  | Bool true -> Ty.tt
+  | Bool false -> Ty.ff
+  | Int i -> Ty.interval (Some i) (Some i)
+  | Float _ -> Ty.float
+  | Char c -> Ty.char_interval c c
+  | String str -> Ty.string_lit str
+
+let is_approximated c =
+  match c with
+  | Float _ -> true
+  | Unit | Nil | Bool _ | Int _ | Char _ | String _ -> false
