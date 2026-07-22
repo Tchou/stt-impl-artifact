@@ -3,7 +3,7 @@ ML_DEPS=conf-libssl dune js_of_ocaml-compiler js_of_ocaml-ppx markup menhir menh
 		ocamlfind ocurl odoc sedlex zarith zarith_stubs_js pomap ppx_deriving tsort \
 		ppx_expect mdx wasm_of_ocaml-compiler binaryen-bin \
 
-.PHONY: phase2 claim_popl24
+.PHONY: phase2 claim_popl24 setup
 
 _opam/.opam-switch/switch-config:
 	@echo "Creating local opam switch"
@@ -26,11 +26,14 @@ cduce/.stamp:
 	opam install cduce-types cduce
 	touch $@
 
+setup: .cduce-installed
+
 Prototype-v1.2.3/.stamp:
 	@echo "Retrieving et al [POPL24] prototype"
 	curl -L -O -J "https://zenodo.org/records/11203457/files/E-Sh4rk/Prototype-v1.2.3.zip?download=1"
 	mkdir -p Prototype-v1.2.3
 	unzip -q Prototype-v1.2.3.zip -d Prototype-v1.2.3
+	rm -f Prototype-v1.2.3.zip
 	mv Prototype-v1.2.3/*/* Prototype-v1.2.3
 	touch $@
 

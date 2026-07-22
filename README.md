@@ -1,6 +1,48 @@
 # Artifact of the paper "Implementing Set-Theoretic Types"
 
-## Presentation
+## Kicking the tires
+
+### Via docker
+
+The simplest way to check is to pull the image
+```
+$ docker run -ti sstt bash
+```
+
+```
+$ cd sstt
+$ dune build @runtest
+```
+This will just run the internal test suite and should not fail.
+
+### Via Makefile
+
+Running outside docker has only been tested on Debian/Ubuntu but should run fine on any
+Unix system that supports OCaml. First, one should install a few external dependencies.
+The list of (Ubuntu/Debian) packages is:
+```
+    binaryen bzip2 ca-certificates \
+    cmake curl g++ git libcurl4-gnutls-dev \
+    libexpat1-dev libgmp-dev libssl-dev \
+    make ninja-build npm pkg-config python3 unzip
+```
+
+the [`opam`](https://opam.ocaml.org/) package manager should
+also be installed. Once this is installed, from the provided
+tarball of the artifact, one can run:
+```
+$ make setup
+```
+This will create a local OPAM switch with the OCaml compiler and required dependencies (so has to not interfere with an existing OCaml installation). This setup can take between 5 and 15 minutes depending on the user configuration.
+
+The installation can then be tested by doing:
+```
+$ cd sstt
+$ dune build @runtest
+```
+Which will run `sstt`'s internal test suite.
+
+## Paper overview
 
 This repository contains the companion artifact for the paper "Implementing
 Set-Theoretic Types".
@@ -53,10 +95,42 @@ Inference for Dynamic Languages, POPL24](https://zenodo.org/records/11203457)
 and that such simplifications (like the SS strategy) are necessary in practice
 or the type quickly grow too large to be useful.
 
-## Artifact description
+## Evaluation instructions
 
-The artifact consists of a checkout of the SSTT library at the time of submission (it has since received more optimizations that are not part of the paper). It contains a script which
-runs the SSTT constraint solving for the 8 configurations described above, for each of the 3 JSON files. The scripts then prints the (as well as stores in a file) the LaTeX code for the table used in the paper (Table 1). The artifacts also contains the web prototype of the SSTT library which provides a small REPL where one can tests subtyping or tallying problems.
+We assume that the test are being done from inside the docker container (in the `sstt` home folder) or at the root of the provided tarball, with the preliminary setup is done.
+
+### Reproducing the benchmarks from p. 22
+
+The table from p. 22 of the paper can be reproduced with:
+
+```
+$ make phase2
+```
+
+This will:
+  - generate the JSON files containing the tallying problems for the three corpuses
+  - evaluate each corpus for all 8 configurations
+
+This generates in the `sstt` directory:
+  - 8 `.log` files (`01....log` to `08....log`) containing the raw numbers
+  - a `benchmark.log` file which is also displayed on the terminal at the end of the test and which contains the LaTeX code for the table given page 22 of the paper.
+  The generated table should be interpreted as such:
+  - Lines `Building/Solving/Total` contain absolute timing and might differ wildly from those in the paper, depending on the actual machine running the tests
+  - Lines `Slowdown` display the relative slowdown of all strategy w.r.t to the ideal one and should show a similar trend
+  - `#Sol` should give the same results as in the paper
+  - `Size/Avg. Size/Peak Size` show memory consumption and should give numbers very close to those in the paper
+  - `Timeout` shows the number of tests that were interrupted after 10s
+
+This last line depends on the actual test machine (a faster machine than used for the paper may pass some test under 10s instead of timing out). If the `Timeout` result is different from the paper in a given configuration, then it is expected that the other numbers (including `#Sol`) also change, since more tests were executed.
+
+### Claim about type simplification in [POPL24]
+The experimental section also claims (top of page 23) that
+an implementation based on CDuce alone cannot perform well and that an auxiliary simplification procedure is necessary.
+This claim can be tested with:
+```
+$ make claim_popl24
+```
+
 
 ## Instructions
 
