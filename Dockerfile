@@ -35,7 +35,7 @@ RUN make .deps-installed
 RUN make Prototype-v1.2.3/.stamp \
          cduce/.stamp \
          sstt/.stamp \
-         MLsem/.stamp && \
+         MLsem/.stamp
 RUN make .cduce-installed
 RUN cd sstt && \
     make web-deps js wasm && \
