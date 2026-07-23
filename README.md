@@ -22,7 +22,7 @@ This will just build the library in default mode.
 
 ### Via Makefile
 
-Expected time: 15 minutes (the time to download dependencies and build a local opam switch, may vary depending on the user's hardware).
+Expected time: 20 minutes (the time to download dependencies and build a local opam switch, may vary depending on the user's hardware).
 
 Running outside docker has only been tested on Debian/Ubuntu but should run fine
 on any Unix system that supports OCaml. First, one should install a few external
