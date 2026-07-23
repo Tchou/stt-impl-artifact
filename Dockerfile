@@ -40,7 +40,7 @@ RUN make .cduce-installed
 RUN cd sstt && \
     make web-deps js wasm && \
     cp -r web ..
-
+RUN echo "test -r '/home/sstt/.opam/opam-init/init.sh' && source '/home/sstt/.opam/opam-init/init.sh' > /dev/null 2> /dev/null || true" >> /home/sstt/.bashrc
 EXPOSE 8000
 
 CMD ["python3", "-m", "http.server", "-d", "web"]
