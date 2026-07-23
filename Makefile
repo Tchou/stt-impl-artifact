@@ -11,7 +11,7 @@ _opam/.opam-switch/switch-config:
 
 .deps-installed: _opam/.opam-switch/switch-config
 	@echo "Installing dependencies"
-	opam install -y $(ML_DEPS)
+	opam update && opam install -y $(ML_DEPS)
 	touch $@
 
 cduce/.stamp:

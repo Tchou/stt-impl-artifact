@@ -10,7 +10,7 @@ LABEL org.opencontainers.image.version="1.0"
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     binaryen bzip2 ca-certificates \
-    cmake curl g++ git libcurl4-gnutls-dev \
+    cmake curl dc g++ git libcurl4-gnutls-dev \
     libexpat1-dev libgmp-dev libssl-dev \
     make ninja-build npm pkg-config python3 unzip \
     && rm -rf /var/lib/apt/lists/*

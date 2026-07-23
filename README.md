@@ -1,28 +1,35 @@
 # Artifact of the paper "Implementing Set-Theoretic Types"
 
+This repository contains the companion artifact for the paper "Implementing
+Set-Theoretic Types".
+
 ## Kicking the tires
 
 ### Via docker
+
+Expected time: a few minutes (the time to download the Docker image).
 
 The simplest way to check is to pull the image
 ```
 $ docker run -ti sstt bash
 ```
-
+Once inside the container :
 ```
 $ cd sstt
-$ dune build @runtest
+$ dune build
 ```
-This will just run the internal test suite and should not fail.
+This will just build the library in default mode.
 
 ### Via Makefile
 
-Running outside docker has only been tested on Debian/Ubuntu but should run fine on any
-Unix system that supports OCaml. First, one should install a few external dependencies.
-The list of (Ubuntu/Debian) packages is:
+Expected time: 15 minutes (the time to download dependencies and build a local opam switch, may vary depending on the user's hardware).
+
+Running outside docker has only been tested on Debian/Ubuntu but should run fine
+on any Unix system that supports OCaml. First, one should install a few external
+dependencies. The list of (Ubuntu/Debian) packages is:
 ```
     binaryen bzip2 ca-certificates \
-    cmake curl g++ git libcurl4-gnutls-dev \
+    cmake curl dc g++ git libcurl4-gnutls-dev \
     libexpat1-dev libgmp-dev libssl-dev \
     make ninja-build npm pkg-config python3 unzip
 ```
@@ -38,14 +45,11 @@ This will create a local OPAM switch with the OCaml compiler and required depend
 The installation can then be tested by doing:
 ```
 $ cd sstt
-$ dune build @runtest
+$ dune build
 ```
-Which will run `sstt`'s internal test suite.
+Which will build the library.
 
 ## Paper overview
-
-This repository contains the companion artifact for the paper "Implementing
-Set-Theoretic Types".
 
 The paper reports on the [SSTT](https://github.com/E-Sh4rk/sstt) (Simple Set-Theoretic Types) library, in
 particular the data-structures used to represent set-theoretic types. Such types are (informally) given by the grammar:
@@ -95,11 +99,25 @@ Inference for Dynamic Languages, POPL24](https://zenodo.org/records/11203457)
 and that such simplifications (like the SS strategy) are necessary in practice
 or the type quickly grow too large to be useful.
 
-## Evaluation instructions
+## Evaluation instructions and Reproducibility guidelines
 
-We assume that the test are being done from inside the docker container (in the `sstt` home folder) or at the root of the provided tarball, with the preliminary setup is done.
+We assume that the test are being done from inside the docker container (in the home directory of  the `sstt` user) or at the root of the provided tarball, with the preliminary setup is done.
 
 ### Reproducing the benchmarks from p. 22
+
+Regarding performances of the data structure and algorithms, the paper makes the following claims, summarized in the table of p. 22:
+- of the four configuration for the data-structure (BDT, SS, HC, SS+HC), SS is
+second only to the "ideal" BDT mode (which is not a realistic mode in practical
+settings). This is shown by comparing the runtime lines of the first four columns of the table and seeing that the second best total time is SS (the first one being BDT)
+
+- the improved subtyping algorithm is an improvement for the SS mode.
+This is shown by the "Naive subtyping/SS" column being slower than the SS* column.
+
+- the improved tallying algorithm is an improvement for the SS mode.
+This is shown by the "Naive tallying/SS" column being slower than the SS*
+column.
+
+- the default SS* strategy is better than an implementation based on the CDuce compiler (comparing the CDuce column with the SS*).
 
 The table from p. 22 of the paper can be reproduced with:
 
@@ -111,9 +129,9 @@ This will:
   - generate the JSON files containing the tallying problems for the three corpuses
   - evaluate each corpus for all 8 configurations
 
-This generates in the `sstt` directory:
+This generates in the `sstt/output` directory:
   - 8 `.log` files (`01....log` to `08....log`) containing the raw numbers
-  - a `benchmark.log` file which is also displayed on the terminal at the end of the test and which contains the LaTeX code for the table given page 22 of the paper.
+  - a `benchmark.tex` file which is also displayed on the terminal at the end of the test and which contains the LaTeX code for the table given page 22 of the paper.
   The generated table should be interpreted as such:
   - Lines `Building/Solving/Total` contain absolute timing and might differ wildly from those in the paper, depending on the actual machine running the tests
   - Lines `Slowdown` display the relative slowdown of all strategy w.r.t to the ideal one and should show a similar trend
@@ -123,7 +141,14 @@ This generates in the `sstt` directory:
 
 This last line depends on the actual test machine (a faster machine than used for the paper may pass some test under 10s instead of timing out). If the `Timeout` result is different from the paper in a given configuration, then it is expected that the other numbers (including `#Sol`) also change, since more tests were executed.
 
+The table can be visualized as PDF by going to the `output` directory and doing:
+```
+$ pdflatex table.tex
+```
+(a `benchmark.tex` file must be present).
+
 ### Claim about type simplification in [POPL24]
+
 The experimental section also claims (top of page 23) that
 an implementation based on CDuce alone cannot perform well and that an auxiliary simplification procedure is necessary.
 This claim can be tested with:
@@ -182,6 +207,3 @@ Note however that:
   the library. The instrumentation causes the code to be slightly slower than a
   non-instrumented version.
 
-## Reproducibility guidelines
-
-The claim from the paper and how to reproduce them with the artifact are document in the section `## Evaluation instructions`
