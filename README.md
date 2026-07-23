@@ -145,7 +145,13 @@ The table can be visualized as PDF by going to the `output` directory and doing:
 ```
 $ make table.pdf
 ```
-(a `benchmark.tex` file must be present).
+a `benchmark.tex` file must be present. This also requires a Texlive installation with the `nicematrix` package.
+
+**Note**: when running from inside a container, it is recommended to
+extract the benchmark files outside:
+```
+$ docker cp sstt-run:/home/sstt/sstt/output output_sstt
+```
 
 ### Claim about type simplification in [POPL24]
 
