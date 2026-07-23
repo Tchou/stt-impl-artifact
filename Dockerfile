@@ -12,7 +12,7 @@ RUN apt-get update && \
     binaryen bzip2 ca-certificates \
     cmake curl dc g++ git libcurl4-gnutls-dev \
     libexpat1-dev libgmp-dev libssl-dev \
-    make ninja-build npm pkg-config python3 rsync unzip && \
+    make ninja-build npm pkg-config python3 rsync texlive-science unzip && \
     apt-get clean
 
 # Create user sstt with a home dir and bash shell
