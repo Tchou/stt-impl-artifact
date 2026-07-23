@@ -64,7 +64,7 @@ where
 -  𝟙 for the top type
 - $\alpha$ is a type variable
 
-The paper proposes a data-structure, dubbed `BDT` (for Binary Decision Tree) to represent such types. It also presents :
+Furthermore, these types can be recursive. The paper proposes a data-structure, dubbed `BDT` (for Binary Decision Tree) to represent such types. It also presents :
 
 - a semantic simplification (SS) aimed at reducing the size of BDTs
 - the complete pseudo-code of an optimized subtyping algorithm (deciding, given two polymorphic type $t$ and $s$ whether $\forall \sigma, t\sigma \leq s\sigma$) (which uses a cache to avoid recomputations, and whose handling is complex in the presence of recursive types)
@@ -96,7 +96,7 @@ The tallying problems from Phase 1 are read and solved by a benchmarking program
 
 The paper also makes the claim that a preliminary (and more naive) version of
 the semantic simplification is present in the artifact of [Polymorphic Type
-Inference for Dynamic Languages, POPL24](https://zenodo.org/records/11203457)
+Inference for Dynamic Languages, POPL24](https://zenodo.org/records/11203457);
 and that such simplifications (like the SS strategy) are necessary in practice
 or the type quickly grow too large to be useful.
 
@@ -111,7 +111,7 @@ Expected time: 15 minutes (depending on the test machine).
 Regarding performances of the data structure and algorithms, the paper makes the following claims, summarized in the table of p. 22:
 - of the four configuration for the data-structure (BDT, SS, HC, SS+HC), SS is
 second only to the "ideal" BDT mode (which is not a realistic mode in practical
-settings). This is shown by comparing the runtime lines of the first four columns of the table and seeing that the second best total time is SS (the first one being BDT)
+settings). This is shown by comparing the runtime lines of the first four columns of the table and seeing that the second-best total time is SS (the first one being BDT)
 
 - the improved subtyping algorithm is an improvement for the SS mode.
 This is shown by the "Naive subtyping/SS" column being slower than the SS* column.
@@ -135,7 +135,8 @@ This will:
 This generates in the `sstt/output` directory:
   - 8 `.log` files (`01....log` to `08....log`) containing the raw numbers
   - a `benchmark.tex` file which is also displayed on the terminal at the end of the test and which contains the LaTeX code for the table given page 22 of the paper.
-  The generated table should be interpreted as such:
+
+The generated table should be interpreted as such:
   - Lines `Building/Solving/Total` contain absolute timing and might differ wildly from those in the paper, depending on the actual machine running the tests
   - Lines `Slowdown` display the relative slowdown of all strategy w.r.t to the ideal one and should show a similar trend
   - `#Sol` should give the same results as in the paper
@@ -167,7 +168,7 @@ This claim can be tested with:
 ```
 $ make claim_popl24
 ```
-This experiments first typechecks (using the artifact of [POPL24]) a simple file containing the `concat` and `flatten` functions on lists. Typechecking should succeeds in less than half a second.
+This experiments first typechecks (using the artifact of [POPL24]) a simple file containing the `concat` and `flatten` functions on lists. Typechecking should succeed in less than half a second.
 Then, the script patches the code to disable type simplification (the `simplify_typ` function is replaced by the identity). Typechecking is run again and should fail with a timeout after 10s.
 
 ## Reusability guidelines
@@ -229,7 +230,7 @@ $ python3 -m http.server
 ```
 or from the docker container:
 ```
-$ docker run --name sstt-run -p 8000:8000 sstt
+$ docker run --name sstt-run -p 8000:8000 nguyenkim/sstt:v1.0.0
 ```
 
 And then pointing one's web browser on
