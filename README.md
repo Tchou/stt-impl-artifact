@@ -11,7 +11,7 @@ Expected time: a few minutes (the time to download the Docker image).
 
 The simplest way to check is to pull the image
 ```
-$ docker run -ti --rm --name sstt-run nguyenkim/sstt:1.0.0 bash
+$ docker run -ti --rm --name sstt-run nguyenkim/sstt:v1.0.0 bash
 ```
 Once inside the container :
 ```
@@ -144,8 +144,9 @@ This generates in the `sstt/output` directory:
 
 This last line depends on the actual test machine (a faster machine than used for the paper may pass some test under 10s instead of timing out). If the `Timeout` result is different from the paper in a given configuration, then it is expected that the other numbers (including `#Sol`) also change, since more tests were executed.
 
-The table can be visualized as PDF by going to the `output` directory and doing:
+The table can be visualized as PDF by going to the `sstt/output` directory and doing:
 ```
+$ cd sstt/output
 $ make table.pdf
 ```
 a `benchmark.tex` file must be present (that is, `make phase2` needs to have been completed successfully once). This also requires a Texlive installation with the `nicematrix` package (on Debian, installing `texlive-science` and `texlive-pictures` is enough).
