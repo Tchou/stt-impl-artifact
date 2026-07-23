@@ -12,7 +12,8 @@ RUN apt-get update && \
     binaryen bzip2 ca-certificates \
     cmake curl dc g++ git libcurl4-gnutls-dev \
     libexpat1-dev libgmp-dev libssl-dev \
-    make ninja-build npm pkg-config python3 rsync texlive-science unzip && \
+    make ninja-build npm pkg-config python3 rsync texlive-science \
+    texlive-pictures texlive-latex-extra unzip && \
     apt-get clean
 
 # Create user sstt with a home dir and bash shell
@@ -35,7 +36,7 @@ RUN make .deps-installed
 RUN make Prototype-v1.2.3/.stamp \
          cduce/.stamp \
          sstt/.stamp \
-         MLsem/.stamp && echo -n
+         MLsem/.stamp && true && true
 RUN make .cduce-installed
 RUN cd sstt && \
     make web-deps js wasm && \
@@ -43,7 +44,7 @@ RUN cd sstt && \
 RUN echo "test -r '/home/sstt/.opam/opam-init/init.sh' && source '/home/sstt/.opam/opam-init/init.sh' > /dev/null 2> /dev/null || true" >> /home/sstt/.bashrc
 
 USER root
-RUN apt install -y texlive-pictures texlive-latex-extra && apt clean
+RUN apt install -y  && apt clean
 USER sstt
 
 ENV OPAM_SWITCH_PREFIX '/home/sstt/_opam'
