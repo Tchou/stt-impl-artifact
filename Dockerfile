@@ -43,6 +43,7 @@ RUN cd sstt && \
     cp -r web ..
 RUN echo "test -r '/home/sstt/.opam/opam-init/init.sh' && source '/home/sstt/.opam/opam-init/init.sh' > /dev/null 2> /dev/null || true" >> /home/sstt/.bashrc
 
+COPY --chown=sstt:sstt claim_01 /home/sstt/claim_01
 
 ENV OPAM_SWITCH_PREFIX '/home/sstt/_opam'
 ENV OCAMLTOP_INCLUDE_PATH '/home/sstt/_opam/lib/toplevel'
