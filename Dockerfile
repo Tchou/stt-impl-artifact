@@ -4,7 +4,7 @@ LABEL org.opencontainers.image.title="Implementing Set-Theoretic Types Artifact"
 LABEL org.opencontainers.image.description="Docker image allowing to reproduce the results of the paper \"Implementing Set-Theoretic Types\""
 LABEL org.opencontainers.image.source="https://github.com/Tchou/stt-impl-artifact"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.version="1.0"
+LABEL org.opencontainers.image.version="1.0.0"
 
 # Basic tools + sudo (needed for passwordless apt as sstt)
 RUN apt-get update && \
@@ -43,9 +43,6 @@ RUN cd sstt && \
     cp -r web ..
 RUN echo "test -r '/home/sstt/.opam/opam-init/init.sh' && source '/home/sstt/.opam/opam-init/init.sh' > /dev/null 2> /dev/null || true" >> /home/sstt/.bashrc
 
-USER root
-RUN apt install -y  && apt clean
-USER sstt
 
 ENV OPAM_SWITCH_PREFIX '/home/sstt/_opam'
 ENV OCAMLTOP_INCLUDE_PATH '/home/sstt/_opam/lib/toplevel'
