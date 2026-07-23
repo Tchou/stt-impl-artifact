@@ -35,12 +35,25 @@ RUN make .deps-installed
 RUN make Prototype-v1.2.3/.stamp \
          cduce/.stamp \
          sstt/.stamp \
-         MLsem/.stamp
+         MLsem/.stamp && echo -n
 RUN make .cduce-installed
 RUN cd sstt && \
     make web-deps js wasm && \
     cp -r web ..
 RUN echo "test -r '/home/sstt/.opam/opam-init/init.sh' && source '/home/sstt/.opam/opam-init/init.sh' > /dev/null 2> /dev/null || true" >> /home/sstt/.bashrc
+
+USER root
+RUN apt install -y texlive-pictures texlive-latex-extra && apt clean
+USER sstt
+
+ENV OPAM_SWITCH_PREFIX '/home/sstt/_opam'
+ENV OCAMLTOP_INCLUDE_PATH '/home/sstt/_opam/lib/toplevel'
+ENV CAML_LD_LIBRARY_PATH '/home/sstt/_opam/lib/stublibs:/home/sstt/_opam/lib/ocaml/stublibs:/home/sstt/_opam/lib/ocaml'
+ENV OCAML_TOPLEVEL_PATH '/home/sstt/_opam/lib/toplevel'
+ENV MANPATH ':/home/sstt/_opam/man'
+ENV PATH '/home/sstt/_opam/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+
 EXPOSE 8000
 
 CMD ["python3", "-m", "http.server", "-d", "web"]
