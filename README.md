@@ -130,58 +130,58 @@ This claim can be tested with:
 ```
 $ make claim_popl24
 ```
+This experiments first typechecks (using the artifact of [POPL24]) a simple file containing the `concat` and `flatten` functions on lists. Typechecking should succeeds in less than half a second.
+Then, the script patches the code to disable type simplification (the `simplify_typ` function is replaced by the identity). Typechecking is run again and should fail with a timeout after 10s.
 
+## Reusability guidelines
 
-## Instructions
+The artifact is [hosted on Github](https://github.com/Tchou/stt-impl-artifact/) and [archived on Zenodo](https://zenodo.org/records/21457731), and released under the MIT License.
 
-### Using docker
-The provided `Dockerfile`, based on an Ubuntu 25.04 image does the following:
-- installs the dependencies from the Ubuntu repository
-- installs the `opam` package manager for OCaml
-- initializes a an opam switch (a specific version of the OCaml compiler and all the relevant libraries)
-- checks out MLsem at the time of submission
-- checks out sstt at the time of submission (an instrumented version)
-- checks out the CDuce compiler
-- builds everything
-
-The image can be built with `docker build -t sstt .`. The command `docker run -p 8000:8000 sstt` launches the online REPL, which can be accessed pointing one's web browser toward [http://localhost:8000](http://localhost:8000).
-
-By doing `docker run -ti sstt bash`, one has access to the `Makefile` script described in the following section and can run:
-    - `make phase2` to run the tests and show the table
-    - `make claim_popl24` to verify the claim about simplifications being necessary
-
-### Using the Makefile
-
-To run the tests outside of `docker` the following pre-requisites should be satisfied:
-- the `opam` package manager should be installed and configured (a local switch is built by the script)
-- the external dependencies should be installed on the system. On Ubuntu/Debian, those are:
+The core of the artifact is the instrumented version of the SSTT library, in the `sstt` folder. It can be run in various modes by modifying the file `sstt/src/lib/sstt/core/utils/config.ml`:
+```ocaml
+type subtyping_cache = HashCache | MapCache | BasicCache
+let use_cduce_backend = false     (* Default: false *)
+let hash_consing = false          (* Default: false *)
+let bdd_simpl = true              (* Default: true *)
+let benchmark_size = false        (* Default: false *)
+let tallying_opti = true          (* Default: true *)
+let subtyping_cache = HashCache   (* Default: HashCache *)
 ```
-git make unzip bubblewrap bzip2 binaryen cmake g++ libcurl4-gnutls-dev libexpat1-dev libgmp-dev libssl-dev ninja-build pkg-config curl npm ca-certificates
+And recompiling/running the benchmark program:
 ```
+$ dune exec -- src/bin/benchmark.exe file.json
+```
+A JSON file has the following format:
+```json
+[
+  {
+    "vars": [ "'a", "'b" ],
+    "mono": [],
+    "rvars": [],
+    "rmono": [],
+    "constr": [
+      [
+        "'a & lst(any, x1) where x1 = lst(tuple0 | (any, x1))",
+        "lst(any, 'b & lst(x1)) where x1 = tuple0 | (any, lst(x1))"
+      ]
+    ]
+  },
+...
+]
+```
+That is a collection of tallying problems where `vars`, `mono`, `rvars`, `rmono`
+are respectively polymorphic variables (can be instantiated), frozen variables (cannot be instantiated), row variables and frozen row variables.
+The `constr` fields contains a list of lists of pairs of types consisting of tallying problem `(t1, t2)` meaning "find all substitutions such that `t1 <= t2`".
+The syntax of types is documented in `sstt/REPL.md`.
 
-Note: `binaryen`, `ninja-build` and `npm` are only needed to build the Web console.
+Note however that:
+- SSTT is under active development, and may diverge from the archived artifact.
+  The latter is provided as an actual full-fledged implementation of the
+  algorithms and data-structures documented in the paper. 
+- Even within the limits of this artifact, this is an instrumented version of
+  the library. The instrumentation causes the code to be slightly slower than a
+  non-instrumented version.
 
-The following rules should be used:
+## Reproducibility guidelines
 
-- `make phase2`: benchmarks the 8 configurations of the SSTT library. The configuration is set at compile time, the 8 configuration files are stored in the directory `sstt/benchmarks/conifg`. The three
-tested `json` files are in `sstt/benchmarks`.
-These files are built from the MLsem checkout if not present.
-
-- `make claim_popl24`: uses the artifact of [POPL24] to typechecks a simple function (concat and flatten on lists) which succeeds in a few hundred milliseconds. Type simplifications is then disabled (by replacing the function by the identity in the code) and the experiment is run again. A timeout is set to kill the program after 10s.
-
-The following auxiliary rules are called to build the necessary dependencies for the two rules above:
-- `_opam/.opam-switch/switch-config` creates the local `opam` for version 5.4.1 of the OCaml compiler.
-- `.deps-installed` install the OCaml dependencies
-- `.cduce/.stamp` clones the CDuce compiler from its public repository
-- `.cduce-installed` installs CDuce in the current opam switch
-- `Prototype-v1.2.3/.stamp` fetches the artifact for [POPL24] from its Zenodo URL
-- `sstt/.stamp` fetches `sstt` from its public repository
-- `MLsem/.stamp` fetches `MLsem` from its public repository, and checks out a commit from the time of submission (it's API as changed since)
-- `sstt/benchmarks/%.json` builds the problem JSON files from tests in the MLsem repository
-
-The submitted tarball already contains a checkout of `cduce`, `MLsem` and `sstt`, but requires the creation of a local opam switch.
-
-We recommend using the two main targets of the makefile to run the tests and
-automatically setup the environment, although it should be fairly easy to run
-the commands manually.
-
+The claim from the paper and how to reproduce them with the artifact are document in the section `## Evaluation instructions`
