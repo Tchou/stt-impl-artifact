@@ -174,7 +174,7 @@ Then, the script patches the code to disable type simplification (the `simplify_
 
 The artifact is [hosted on Github](https://github.com/Tchou/stt-impl-artifact/) and [archived on Zenodo](https://zenodo.org/records/21457731), and released under the MIT License.
 
-The core of the artifact is the instrumented version of the SSTT library, in the `sstt` folder. It can be run in various modes by modifying the file `sstt/src/lib/sstt/core/utils/config.ml`:
+The core of the artifact is the instrumented version of the SSTT library, in the `sstt` directory. It can be run in various modes by modifying the file `sstt/src/lib/sstt/core/utils/config.ml`:
 ```ocaml
 type subtyping_cache = HashCache | MapCache | BasicCache
 let use_cduce_backend = false     (* Default: false *)
@@ -236,3 +236,15 @@ And then pointing one's web browser on
 [https://localhost:8000](https://localhost:8000). Here some problems can be
 tested, such as `[('A , int) <= (bool, 'B)];;` which executes the tallying
 algorithm to find substitutions that make the inequation hold.
+
+
+## Additional information
+
+The main contributions of the paper are implemented in the `sstt` directory.
+Specifically:
+- The `BDT` data-structure is in `sstt/src/lib/sstt/core/utils/bdd.ml`
+- The subtyping algorithm is distributed among:
+  - `sstt/src/lib/sstt/core/node.ml` (entry point)
+  - `sstt/src/lib/sstt/core/components/*.ml` (the `is_empty` function in each module)
+  - `sstt/src/lib/sstt/core/utils/bttable.ml` (the backtracking table with invalidation)
+- The tallying algorithm is mainly in the file `sstt/src/lib/sstt/types/tallying.ml`
