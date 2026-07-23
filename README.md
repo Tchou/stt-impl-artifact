@@ -11,7 +11,7 @@ Expected time: a few minutes (the time to download the Docker image).
 
 The simplest way to check is to pull the image
 ```
-$ docker run -ti sstt bash
+$ docker run -ti --rm --name sstt-run nguyenkim/sstt:1.0.0 bash
 ```
 Once inside the container :
 ```
@@ -28,10 +28,11 @@ Running outside docker has only been tested on Debian/Ubuntu but should run fine
 on any Unix system that supports OCaml. First, one should install a few external
 dependencies. The list of (Ubuntu/Debian) packages is:
 ```
-    binaryen bzip2 ca-certificates \
-    cmake curl dc g++ git libcurl4-gnutls-dev \
-    libexpat1-dev libgmp-dev libssl-dev \
-    make ninja-build npm pkg-config python3 unzip
+  binaryen bzip2 ca-certificates \
+  cmake curl dc g++ git libcurl4-gnutls-dev \
+  libexpat1-dev libgmp-dev libssl-dev \
+  make ninja-build npm pkg-config python3 rsync texlive-science \
+  texlive-pictures texlive-latex-extra unzip
 ```
 
 the [`opam`](https://opam.ocaml.org/) package manager should
@@ -101,9 +102,11 @@ or the type quickly grow too large to be useful.
 
 ## Evaluation instructions and Reproducibility guidelines
 
-We assume that the test are being done from inside the docker container (in the home directory of  the `sstt` user) or at the root of the provided tarball, with the preliminary setup is done.
+We assume that the test are being done from inside the docker container (in the home directory of the `sstt` user) or at the root of the provided tarball, with the preliminary setup done.
 
 ### Reproducing the benchmarks from p. 22
+
+Expected time: 15 minutes (depending on the test machine).
 
 Regarding performances of the data structure and algorithms, the paper makes the following claims, summarized in the table of p. 22:
 - of the four configuration for the data-structure (BDT, SS, HC, SS+HC), SS is
@@ -126,8 +129,8 @@ $ make phase2
 ```
 
 This will:
-  - generate the JSON files containing the tallying problems for the three corpuses
-  - evaluate each corpus for all 8 configurations
+  - generate the JSON files containing the tallying problems for the three corpuses (the phase 1 described above)
+  - evaluate each corpus for all 8 configurations (the actual phase 2)
 
 This generates in the `sstt/output` directory:
   - 8 `.log` files (`01....log` to `08....log`) containing the raw numbers
@@ -145,7 +148,7 @@ The table can be visualized as PDF by going to the `output` directory and doing:
 ```
 $ make table.pdf
 ```
-a `benchmark.tex` file must be present. This also requires a Texlive installation with the `nicematrix` package.
+a `benchmark.tex` file must be present (that is, `make phase2` needs to have been completed successfully once). This also requires a Texlive installation with the `nicematrix` package (on Debian, installing `texlive-science` and `texlive-pictures` is enough).
 
 **Note**: when running from inside a container, it is recommended to
 extract the benchmark files outside:
@@ -154,6 +157,8 @@ $ docker cp sstt-run:/home/sstt/sstt/output output_sstt
 ```
 
 ### Claim about type simplification in [POPL24]
+
+Expected time: less than a minute
 
 The experimental section also claims (top of page 23) that
 an implementation based on CDuce alone cannot perform well and that an auxiliary simplification procedure is necessary.
@@ -213,3 +218,20 @@ Note however that:
   the library. The instrumentation causes the code to be slightly slower than a
   non-instrumented version.
 
+Furthermore, the artifact also serves as a general sandbox to play with set-theoretic
+types. A web based REPL (documented in `sstt/REPL`) is can be build by doing:
+```
+$ cd sstt
+$ make web-deps js wasm
+$ cd web
+$ python3 -m http.server
+```
+or from the docker container:
+```
+$ docker run --name sstt-run -p 8000:8000 sstt
+```
+
+And then pointing one's web browser on
+[https://localhost:8000](https://localhost:8000). Here some problems can be
+tested, such as `[('A , int) <= (bool, 'B)];;` which executes the tallying
+algorithm to find substitutions that make the inequation hold.
