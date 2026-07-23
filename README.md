@@ -143,7 +143,7 @@ This last line depends on the actual test machine (a faster machine than used fo
 
 The table can be visualized as PDF by going to the `output` directory and doing:
 ```
-$ pdflatex table.tex
+$ make table.pdf
 ```
 (a `benchmark.tex` file must be present).
 
